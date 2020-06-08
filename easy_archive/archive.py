@@ -113,6 +113,9 @@ class Archive(object):
     def namelist(self):
         return self._archive.namelist()
 
+    def close(self):
+        return self._archive.close()
+
     def extractall(self, destination_path):
         if os.path.splitext(self.path)[-1].lower() == '.rar':
             rarfile = RarFile(self.path)
@@ -238,6 +241,9 @@ class TarArchive(BaseArchive):
     def filenames(self):
         return self._archive.getnames()
 
+    def close(self):
+        return self._archive.close()
+
     def extractall(self, file):
         return self._archive.extractall(file)
 
@@ -256,6 +262,9 @@ class ZipArchive(BaseArchive):
     def namelist(self):
         return self._archive.namelist()
 
+    def close(self):
+        return self._archive.close()
+
     def extractall(self, file):
         return self._archive.extractall(file)
 
@@ -271,12 +280,17 @@ class RarArchive(BaseArchive):
     def filenames(self):
         return self._archive.namelist()
 
+    def close(self):
+        return self._archive.close()
+
     def extraxt(self):
         rarfile = rarfile.RarFile.self._archive
         rarfile.extraxt(self._archive._rarfile)
 
     def extractall(self, file):
         return self._archive.extractall(file)
+
+    # TODO Implement is_protected
 
     # TODO Implement printdir
     def list(self, *args, **kwargs):
