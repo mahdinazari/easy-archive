@@ -116,6 +116,10 @@ class Archive(object):
     def close(self):
         return self._archive.close()
 
+    def is_encrypted(self):
+        return self._archive.is_encrypted()
+
+
     def extractall(self, destination_path):
         if os.path.splitext(self.path)[-1].lower() == '.rar':
             rarfile = RarFile(self.path)
@@ -241,6 +245,9 @@ class TarArchive(BaseArchive):
     def filenames(self):
         return self._archive.getnames()
 
+    def is_encrypted(self):
+        return False
+
     def close(self):
         return self._archive.close()
 
@@ -265,6 +272,13 @@ class ZipArchive(BaseArchive):
     def close(self):
         return self._archive.close()
 
+    def is_encrypted(self):
+        for file_ in self._archive.infolist():
+            if file_.flag_bits & 0x1 != 0:
+                return True
+            else:
+                return False
+
     def extractall(self, file):
         return self._archive.extractall(file)
 
@@ -282,6 +296,9 @@ class RarArchive(BaseArchive):
 
     def close(self):
         return self._archive.close()
+
+    def is_encrypted(self):
+        return self._archive.needs_password()
 
     def extraxt(self):
         rarfile = rarfile.RarFile.self._archive
