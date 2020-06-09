@@ -304,6 +304,10 @@ class RarArchive(BaseArchive):
         rarfile = rarfile.RarFile.self._archive
         rarfile.extraxt(self._archive._rarfile)
 
+
+
+
+
     def extractall(self, file):
         return self._archive.extractall(file)
 
@@ -311,17 +315,16 @@ class RarArchive(BaseArchive):
 
     # TODO Implement printdir
     def list(self, *args, **kwargs):
-        return self._archive.namelist()
-#        self.printdir(*args, **kwargs)
+        self.printdir(*args, **kwargs)
 
-#    def printdir(self, file=None):
-#        """Print a table of contents for the zip file."""
-#        print("%-46s %19s %12s" % ("File Name", "Modified    ", "Size"),
-#              file=file)
-#        for zinfo in self.filelist:
-#            date = "%d-%02d-%02d %02d:%02d:%02d" % zinfo.date_time[:6]
-#            print("%-46s %s %12d" % (zinfo.name, date, zinfo.file_size),
-#                  file=file)
+    def printdir(self, file=None):
+        """Print a table of contents for the zip file."""
+        print("%-46s %19s %12s" % ("File Name", "Modified    ", "Size"),
+              file=file)
+        for file_ in self._archive._file_parser.infolist():
+            date = "%d-%02d-%02d %02d:%02d:%02d" % file_.date_time[:6]
+            print("%-46s %s %12d" % (file_.filename, date, file_.file_size),
+                  file=file)
 
 extension_map = {
     '.docx': ZipArchive,
