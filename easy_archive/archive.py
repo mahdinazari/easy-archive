@@ -119,60 +119,28 @@ class Archive(object):
     def is_encrypted(self):
         return self._archive.is_encrypted()
 
-
-    def extractall(self, destination_path):
-        if os.path.splitext(self.path)[-1].lower() == '.rar':
-            rarfile = RarFile(self.path)
-            rarfile.extract(destination_path)
-            rarfile.close()
-
-        if os.path.splitext(self.path)[-1].lower() == '.zip':
-            zipfile = ZipFile(self.path)
-            zipfile.extractall(destination_path)
-            zipfile.close()
-
-        if re.search(r'^.*\.(tar|tar.gz|tar.xz)$', self.path):
-            t = TarFile.open(self.path)
-            t.extractall(destination_path)
-
-        files = self._archive.filenames()
-        for file_ in files:
+    def extractall(self, requested_file='', path_from_local=''):
+        files = []
+        file_path = os.path.join(path_from_local, requested_file)
+        destination_path = '/home/mehdi/Desktop/deleteme/result'
+        parent_archive = Archive(file_path)
+        parent_archive.extract(destination_path)
+        namelist = parent_archive.namelist()
+        parent_archive.close()
+        for name in namelist:
             try:
-                if os.path.splitext(file_)[-1].lower() == '.rar':
-                    file_path = RarFile(destination_path + '/' + file_)
-                    file_path.extractall(destination_path)
-                    full_file_path = destination_path + '/' + file_
+                if os.path.splitext(name)[-1].lower() in SUPPORTED_ARCHIVE:
+                    self.extractall(
+                        requested_file=name,
+                        path_from_local=destination_path
+                    )
 
-                    for name in RarFile(full_file_path).namelist():
-                        if os.path.splitext(name)[-1].lower() == '.rar':
-                            r = RarFile(destination_path + '/' + name)
-                            r.extractall(destination_path)
-
-                if os.path.splitext(file_)[-1].lower() == '.zip':
-                    file_path = ZipFile(destination_path + '/' + file_)
-                    file_path.extractall(destination_path)
-                    full_file_path = destination_path + '/' + file_
-
-                    for name in ZipFile(full_file_path).namelist():
-                        if os.path.splitext(name)[-1].lower() == '.zip':
-                            z = ZipFile(destination_path + '/' + name)
-                            z.extractall(destination_path)
-
-                if re.search(r'^.*\.(tar|tar.gz|tar.xz)$', file_):
-                    file_path = tarfile.open(destination_path + '/' + file_)
-                    file_path.extractall(destination_path)
-                    full_file_path = os.path.split(
-                        os.path.abspath(name)
-                    )[0] + '/' + file_
-
-                    for name in file_path.members:
-                        if re.search(r'^.*\.(tar|tar.gz|tar.xz)$', name.name):
-                            t = TarFile(destination_path + '/' + name.name)
-                            t.extractall(destination_path)
-
+                else:
+                    files.append(name)
             except Exception as e:
                 print(e)
                 pass
+        return destination_path
 
 
 class BaseArchive(object):
@@ -303,10 +271,6 @@ class RarArchive(BaseArchive):
     def extraxt(self):
         rarfile = rarfile.RarFile.self._archive
         rarfile.extraxt(self._archive._rarfile)
-
-
-
-
 
     def extractall(self, file):
         return self._archive.extractall(file)
