@@ -131,17 +131,20 @@ class Archive(object):
     def is_encrypted(self):
         return self._archive.is_encrypted()
 
-    def extractall(self, requested_file='', path_from_local=''):
+    def extractall(self, path_from_local='', requested_file=''):
         files = []
+        requested_file = requested_file if requested_file != '' else self.path
         file_path = os.path.join(path_from_local, requested_file)
         destination_path = path_from_local \
             if path_from_local != '' else os.path.dirname(file_path)
-        parent_archive = Archive(file_path)
-        parent_archive.extract(destination_path)
-        namelist = parent_archive.namelist()
-        parent_archive.close()
-        for name in namelist:
-            try:
+
+        try:
+            parent_archive = Archive(file_path)
+            parent_archive.extract(destination_path)
+            namelist = parent_archive.namelist()
+            parent_archive.close()
+
+            for name in namelist:
                 if os.path.splitext(name)[-1].lower() in SUPPORTED_ARCHIVE:
                     self.extractall(
                         requested_file=name,
@@ -150,9 +153,9 @@ class Archive(object):
 
                 else:
                     files.append(name)
-            except Exception as e:
-                print(e)
-                pass
+        except Exception as e:
+            print(e)
+            pass
         return destination_path
 
 

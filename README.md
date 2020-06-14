@@ -32,7 +32,7 @@ archive.[extract | extractall]('destination_path')
 - *is_encrypted:* Specified the archive require password for extract or not.
 - *extract:* Extract single archive level in current path or given path
     directory.
-- *extractall:* Extract all archived level in given path directory.
+- *extractall:* Extract all archived level in current path or given path directory.
 - *close:* Close open archive file.
 
 
