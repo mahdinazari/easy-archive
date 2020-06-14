@@ -4,21 +4,33 @@ import re
 
 import tarfile
 import rarfile
+from py7zr import SevenZipFile
 from zipfile import ZipFile
 from rarfile import RarFile
 from tarfile import TarFile
 
 
 SUPPORTED_ARCHIVE = [
-    '.zip',
-    '.rar',
+    '.docx',
+    '.egg',
+    '.jar',
+    '.odg',
+    '.odp',
+    '.ods',
+    '.odt',
+    '.pptx',
     '.tar',
     '.tar.bz2',
     '.tar.gz',
-    'tar.xz',
     '.tgz',
     '.tz2',
+    '.xlsx',
+    '.zip',
+    '.rar',
+    '.7z',
+    'tar.xz',
 ]
+
 TAR_ARCHIVE = [
     '.tar',
     '.tar.bz2',
@@ -122,7 +134,8 @@ class Archive(object):
     def extractall(self, requested_file='', path_from_local=''):
         files = []
         file_path = os.path.join(path_from_local, requested_file)
-        destination_path = '/home/mehdi/Desktop/deleteme/result'
+        destination_path = path_from_local \
+            if path_from_local != '' else os.path.dirname(file_path)
         parent_archive = Archive(file_path)
         parent_archive.extract(destination_path)
         namelist = parent_archive.namelist()
@@ -149,7 +162,10 @@ class BaseArchive(object):
     """
     def __del__(self):
         if hasattr(self, "_archive"):
-            self._archive.close()
+            if isinstance(self._archive, SevenZipFile):
+                pass
+            else:
+                self._archive.close()
 
     def list(self):
         raise NotImplementedError()
@@ -223,6 +239,42 @@ class TarArchive(BaseArchive):
         return self._archive.extractall(file)
 
 
+class SevenZipArchive(BaseArchive):
+
+    def __init__(self, file):
+        self._archive = SevenZipFile(file, mode='r')
+
+    def list(self, *args, **kwargs):
+        self._archive.printdir(*args, **kwargs)
+
+    def filenames(self):
+        return self._archive.getnames()
+
+    def namelist(self):
+        return self._archive.getnames()
+
+    def close(self):
+        return self._archive.close()
+
+    def extract(self, file):
+        return self._archive.extract(file)
+
+    def is_encrypted(self):
+        return self._archive.password_protected
+
+    def extractall(self, file):
+        return self._archive.extractall(file)
+
+#    def printdir(self, file=None):
+#        """Print a table of contents for the zip file."""
+#        print("%-46s %19s %12s" % ("File Name", "Modified    ", "Size"),
+#              file=file)
+#        for file_ in self._archive.files:
+#            date = "%d-%02d-%02d %02d:%02d:%02d" % file_.date_time[:6]
+#            print("%-46s %s %12d" % (file_['filename'], date, file_.file_size),
+#                  file=file)
+
+
 class ZipArchive(BaseArchive):
 
     def __init__(self, file):
@@ -275,9 +327,6 @@ class RarArchive(BaseArchive):
     def extractall(self, file):
         return self._archive.extractall(file)
 
-    # TODO Implement is_protected
-
-    # TODO Implement printdir
     def list(self, *args, **kwargs):
         self.printdir(*args, **kwargs)
 
@@ -307,5 +356,6 @@ extension_map = {
     '.xlsx': ZipArchive,
     '.zip': ZipArchive,
     '.rar': RarArchive,
+    '.7z': SevenZipArchive,
 }
 
