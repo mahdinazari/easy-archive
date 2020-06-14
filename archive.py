@@ -11,16 +11,26 @@ from tarfile import TarFile
 
 
 SUPPORTED_ARCHIVE = [
-    '.zip',
-    '.rar',
+    '.docx',
+    '.egg',
+    '.jar',
+    '.odg',
+    '.odp',
+    '.ods',
+    '.odt',
+    '.pptx',
     '.tar',
     '.tar.bz2',
     '.tar.gz',
-    'tar.xz',
     '.tgz',
     '.tz2',
-    '.7z'
+    '.xlsx',
+    '.zip',
+    '.rar',
+    '.7z',
+    'tar.xz',
 ]
+
 TAR_ARCHIVE = [
     '.tar',
     '.tar.bz2',
@@ -121,16 +131,20 @@ class Archive(object):
     def is_encrypted(self):
         return self._archive.is_encrypted()
 
-    def extractall(self, requested_file='', path_from_local=''):
+    def extractall(self, path_from_local='', requested_file=''):
         files = []
+        requested_file = requested_file if requested_file != '' else self.path
         file_path = os.path.join(path_from_local, requested_file)
-        destination_path = '/home/mehdi/Desktop/deleteme/result'
-        parent_archive = Archive(file_path)
-        parent_archive.extract(destination_path)
-        namelist = parent_archive.namelist()
-        parent_archive.close()
-        for name in namelist:
-            try:
+        destination_path = path_from_local \
+            if path_from_local != '' else os.path.dirname(file_path)
+
+        try:
+            parent_archive = Archive(file_path)
+            parent_archive.extract(destination_path)
+            namelist = parent_archive.namelist()
+            parent_archive.close()
+
+            for name in namelist:
                 if os.path.splitext(name)[-1].lower() in SUPPORTED_ARCHIVE:
                     self.extractall(
                         requested_file=name,
@@ -139,9 +153,9 @@ class Archive(object):
 
                 else:
                     files.append(name)
-            except Exception as e:
-                print(e)
-                pass
+        except Exception as e:
+            print(e)
+            pass
         return destination_path
 
 
@@ -243,7 +257,10 @@ class SevenZipArchive(BaseArchive):
         return self._archive.getnames()
 
     def close(self):
-        return self._archive.close()
+        try:
+            return self._archive.close()
+        except Exception as e:
+            print(e)
 
     def extract(self, file):
         return self._archive.extract(file)
